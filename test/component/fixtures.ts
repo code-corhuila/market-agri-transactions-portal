@@ -53,3 +53,31 @@ export const BUYER = {
     role: 'BUYER' as const,
   },
 };
+
+export const PRODUCER = {
+  ...BUYER,
+  user: {
+    id: '0b6f2c7e-4a51-4c1e-9d0e-2f1c3a7b9e10',
+    name: 'Ana Ruiz',
+    email: 'productora@market-agri.test',
+    role: 'PRODUCER' as const,
+  },
+};
+
+export const ADMIN = {
+  ...BUYER,
+  user: { ...BUYER.user, id: 'a0a0a0a0-1b2c-4d3e-8f90-000000000001', role: 'ADMIN' as const },
+};
+
+/** D-C24: `{ data, meta }`. */
+export function page<T>(
+  data: T[],
+  meta: Partial<{ page: number; limit: number; total: number }> = {},
+) {
+  const limit = meta.limit ?? 20;
+  const total = meta.total ?? data.length;
+  return {
+    data,
+    meta: { page: meta.page ?? 1, limit, total, totalPages: Math.ceil(total / limit) },
+  };
+}
