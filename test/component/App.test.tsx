@@ -1,6 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { apiClient } from 'shell/apiClient';
+import { clearSession, setSession } from 'shell/session';
 import App from '../../src/App';
+import { BUYER, page } from './fixtures';
 
 // The container mounts ./App under /transacciones/* (ADR-021): every route below it is this portal's.
 function renderAt(path: string) {
@@ -11,8 +14,12 @@ function renderAt(path: string) {
   );
 }
 
+afterEach(() => clearSession());
+
 describe('transactions portal', () => {
   it('opens on its main page', () => {
+    setSession(BUYER);
+    vi.spyOn(apiClient, 'get').mockResolvedValue(page([]));
     renderAt('/');
     expect(screen.getByRole('heading', { level: 1, name: 'Mis compras' })).toBeInTheDocument();
   });
