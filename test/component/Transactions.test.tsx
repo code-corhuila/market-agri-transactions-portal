@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { apiClient } from 'shell/apiClient';
 import { clearSession, setSession } from 'shell/session';
 import App from '../../src/App';
@@ -12,6 +12,11 @@ import { ADMIN, BUYER, PRODUCER, PRODUCT_ID, TRANSACTION_ID, page, transaction }
 const DETAIL = `/api/v1/transactions/${TRANSACTION_ID}`;
 const MINE = '/api/v1/transactions/mine';
 
+/** Where the router is: a redirect inside the portal shows here. */
+function Where() {
+  return <p data-testid="where">{useLocation().pathname}</p>;
+}
+
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
@@ -19,6 +24,7 @@ function renderAt(path: string) {
         <Route path="/transacciones/*" element={<App />} />
       </Routes>
       <Link to="/transacciones?page=2">Ir a la página 2 (prueba)</Link>
+      <Where />
     </MemoryRouter>,
   );
 }
@@ -97,6 +103,11 @@ describe('transaction detail (HU-TXN-001, E-41)', () => {
     expect(screen.getByText('Neto a recibir')).toBeInTheDocument();
     expect(screen.getByText('$ 462.500', { selector: 'dd' })).toBeInTheDocument();
     expect(screen.getByText('Pendiente de desembolso')).toBeInTheDocument();
+    const crumbs = screen.getByRole('navigation', { name: 'Ruta de navegación' });
+    expect(within(crumbs).getByRole('link', { name: 'Mis ventas' })).toHaveAttribute(
+      'href',
+      '/transacciones/ventas',
+    );
   });
 
   it('shows its own 404 for an address that is not a transaction, without asking', () => {
@@ -153,13 +164,33 @@ describe('my purchases and my sales (HU-TXN-001, E-42)', () => {
     expect(row.getByText(/Ana Ruiz/)).toHaveTextContent('2,5 arrobas · Ana Ruiz · 13/10/2026');
   });
 
-  it('lists the producer sales with the buyer of each one', async () => {
+  // The container's navigation (front, src/remotes/registry.ts) links the producer to
+  // /transacciones/ventas and the buyer to /transacciones.
+  it('lists the producer sales at /ventas with the buyer of each one', async () => {
     setSession(PRODUCER);
     get().mockResolvedValue(page([transaction({ status: 'CONFIRMED' })]));
-    renderAt('/transacciones');
+    renderAt('/transacciones/ventas');
     expect(screen.getByRole('heading', { level: 1, name: 'Mis ventas' })).toBeInTheDocument();
     expect(await screen.findByText(/Carlos Pérez/)).toBeInTheDocument();
     expect(screen.getByText('Confirmada')).toHaveAttribute('data-variant', 'success');
+    expect(screen.getByRole('link', { name: 'Café especial de altura' })).toHaveAttribute(
+      'href',
+      `/transacciones/${TRANSACTION_ID}`,
+    );
+  });
+
+  it('takes each role to the address of its own list', async () => {
+    get().mockResolvedValue(page([]));
+    setSession(PRODUCER);
+    const { unmount } = renderAt('/transacciones');
+    expect(await screen.findByText('Todavía no tiene ventas.')).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent('/transacciones/ventas');
+    unmount();
+
+    setSession(BUYER);
+    renderAt('/transacciones/ventas');
+    expect(await screen.findByText('Todavía no tiene compras.')).toBeInTheDocument();
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/transacciones$/);
   });
 
   it('guides an empty list: the buyer to the catalog, the producer with a sentence', async () => {
@@ -174,7 +205,7 @@ describe('my purchases and my sales (HU-TXN-001, E-42)', () => {
     unmount();
 
     setSession(PRODUCER);
-    renderAt('/transacciones');
+    renderAt('/transacciones/ventas');
     expect(await screen.findByText('Todavía no tiene ventas.')).toBeInTheDocument();
   });
 
