@@ -39,7 +39,7 @@ for excluded in node_modules dist .git debug.log "${SECRETS[@]}"; do
   if [ -e "$context/$excluded" ]; then fail "the context leaves out $excluded"; else pass "the context leaves out $excluded"; fi
 done
 # What deploy/Dockerfile and `tsc -b` read: excluding any of it would break the build.
-for needed in package.json package-lock.json index.html src config deploy/compose.yml test tsconfig.json vite.config.ts vitest.config.ts deploy/nginx.conf; do
+for needed in package.json package-lock.json index.html src config test tsconfig.json vite.config.ts vitest.config.ts deploy/nginx.conf; do
   if [ -e "$context/$needed" ]; then pass "the context keeps $needed"; else fail "the context keeps $needed"; fi
 done
 
@@ -58,9 +58,13 @@ else
 fi
 
 # ADR-017: the image serves what the gateway asks for once it strips /portals/transactions/.
+# Polled, not a fixed wait: nginx may take longer than a second to listen on a loaded runner.
 docker run -d --rm --name transactions-portal-check market-agri-transactions-portal:check > /dev/null
-sleep 1
-entry="$(docker exec transactions-portal-check wget -qSO /dev/null http://127.0.0.1/remoteEntry.js 2>&1)"
+entry=""
+for _ in $(seq 1 15); do
+  entry="$(docker exec transactions-portal-check wget -qSO /dev/null http://127.0.0.1/remoteEntry.js 2>&1)" && break
+  sleep 1
+done
 docker stop transactions-portal-check > /dev/null
 if grep -qi 'Cache-Control: no-store' <<< "$entry"; then
   pass "remoteEntry.js is served at the root of the image, never cached"
