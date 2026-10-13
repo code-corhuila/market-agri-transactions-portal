@@ -8,7 +8,8 @@ import { TransactionPage } from './transactions/pages/TransactionPage';
 export default function App() {
   return (
     <Routes>
-      <Route index element={<MyTransactionsPage />} />
+      <Route index element={<MyTransactionsPage list="purchases" />} />
+      <Route path="ventas" element={<MyTransactionsPage list="sales" />} />
       <Route path="comprar/:productId" element={<CheckoutPage />} />
       <Route path=":id" element={<TransactionPage />} />
       <Route path="*" element={<NotFoundPage />} />

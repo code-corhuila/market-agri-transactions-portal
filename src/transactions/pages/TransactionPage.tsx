@@ -6,6 +6,7 @@ import { useSession } from 'shell/useSession';
 import { getTransaction } from '../api/transactions';
 import { useRemote } from '../api/useRemote';
 import { RetryAlert } from '../components/RetryAlert';
+import { PURCHASES_PATH, SALES_PATH } from '../model/routes';
 import { formatDateTime, formatNumber, formatPesos } from '../model/money';
 import { isTransactionId, statusBadge, unitName, type TransactionView } from '../model/transaction';
 import { NotFoundPage } from './NotFoundPage';
@@ -39,7 +40,11 @@ function TransactionDetail({ id }: { id: string }) {
       <EmptyState
         icon={SearchX}
         title={remote.error.message}
-        action={<Link to="/transacciones">Ver mis compras</Link>}
+        action={
+          <Link to={producer ? SALES_PATH : PURCHASES_PATH}>
+            {producer ? 'Ver mis ventas' : 'Ver mis compras'}
+          </Link>
+        }
       />
     );
   }
@@ -54,7 +59,9 @@ function Detail({ item, producer }: { item: TransactionView; producer: boolean }
     <section className="stack">
       <Breadcrumbs
         items={[
-          { label: producer ? 'Mis ventas' : 'Mis compras', to: '/transacciones' },
+          producer
+            ? { label: 'Mis ventas', to: SALES_PATH }
+            : { label: 'Mis compras', to: PURCHASES_PATH },
           { label: item.productName },
         ]}
       />
@@ -66,7 +73,7 @@ function Detail({ item, producer }: { item: TransactionView; producer: boolean }
         <EmptyState
           icon={SearchX}
           title="El pago no se completó."
-          action={<Link to={`/transacciones/comprar/${item.productId}`}>Intentar de nuevo</Link>}
+          action={<Link to={`${PURCHASES_PATH}/comprar/${item.productId}`}>Intentar de nuevo</Link>}
         />
       )}
       <Card>

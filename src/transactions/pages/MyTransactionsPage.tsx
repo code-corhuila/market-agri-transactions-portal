@@ -1,5 +1,5 @@
 import { Receipt } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button, EmptyState, LoadingBlock, PageHeader } from 'shell/ui';
 import { useSession } from 'shell/useSession';
 import { getMyTransactions } from '../api/transactions';
@@ -14,9 +14,16 @@ function pageFrom(params: URLSearchParams): number {
   return Number.isInteger(page) && page >= 1 ? page : 1;
 }
 
-/** HU-TXN-001, E-42: the buyer's purchases or the producer's sales (the role decides which). */
-export function MyTransactionsPage() {
+/**
+ * HU-TXN-001, E-42: the buyer's purchases (index) or the producer's sales (`ventas`), the addresses
+ * the container's navigation links to; each role opening the other one is taken to its own.
+ */
+export function MyTransactionsPage({ list }: { list: 'purchases' | 'sales' }) {
   const role = useSession()?.user.role;
+  const { search } = useLocation();
+  if (role === 'PRODUCER' && list === 'purchases')
+    return <Navigate to={`ventas${search}`} replace />;
+  if (role === 'BUYER' && list === 'sales') return <Navigate to={`..${search}`} replace />;
   if (role === 'PRODUCER') return <TransactionList title="Mis ventas" producer />;
   if (role === 'BUYER') return <TransactionList title="Mis compras" producer={false} />;
   return (

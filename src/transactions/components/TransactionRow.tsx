@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Badge, Card } from 'shell/ui';
 import { formatDate, formatNumber, formatPesos } from '../model/money';
+import { transactionPath } from '../model/routes';
 import { statusBadge, unitName, type TransactionView } from '../model/transaction';
 import styles from './TransactionRow.module.css';
 
@@ -10,7 +11,7 @@ export function TransactionRow({ item, other }: { item: TransactionView; other: 
   return (
     <Card as="li" className={styles.row}>
       <div className={styles.top}>
-        <Link to={item.id} className={styles.name}>
+        <Link to={transactionPath(item.id)} className={styles.name}>
           {item.productName}
         </Link>
         <Badge variant={badge.variant}>{badge.label}</Badge>
