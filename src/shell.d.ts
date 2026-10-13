@@ -48,6 +48,10 @@ declare module 'shell/ui' {
     children: ReactElement;
     className?: string;
   }): ReactNode;
+  /** Every item but the last has a route; the last one (the current page) has none. */
+  export function Breadcrumbs(props: {
+    items: [...{ label: string; to: string }[], { label: string; to?: never }];
+  }): ReactNode;
   export function EmptyState(props: {
     icon: LucideIcon;
     title: ReactNode;

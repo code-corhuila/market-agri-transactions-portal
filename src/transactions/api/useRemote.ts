@@ -16,7 +16,10 @@ export function useRemote<T>(load: (signal: AbortSignal) => Promise<T>, key: str
     const controller = new AbortController();
     setRemote((current) => (current.state === 'data' ? current : { state: 'loading' }));
     load(controller.signal).then(
-      (data) => setRemote({ state: 'data', data }),
+      (data) => {
+        // A replaced request never wins, even if the client resolves it instead of rejecting it.
+        if (!controller.signal.aborted) setRemote({ state: 'data', data });
+      },
       (error: ApiError) => {
         if (!controller.signal.aborted) setRemote({ state: 'error', error });
       },
