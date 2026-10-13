@@ -39,14 +39,33 @@ for excluded in node_modules dist .git debug.log "${SECRETS[@]}"; do
   if [ -e "$context/$excluded" ]; then fail "the context leaves out $excluded"; else pass "the context leaves out $excluded"; fi
 done
 # What deploy/Dockerfile and `tsc -b` read: excluding any of it would break the build.
-for needed in package.json package-lock.json index.html src config test tsconfig.json vite.config.ts vitest.config.ts deploy/nginx.conf; do
+for needed in package.json package-lock.json index.html src config deploy/compose.yml test tsconfig.json vite.config.ts vitest.config.ts deploy/nginx.conf; do
   if [ -e "$context/$needed" ]; then pass "the context keeps $needed"; else fail "the context keeps $needed"; fi
 done
 
-if docker build -q -f deploy/Dockerfile -t market-agri-transactions-portal:check . > /dev/null; then
+# R-24: without the shell's address the portal would look for it on localhost.
+if docker build -q -f deploy/Dockerfile -t market-agri-transactions-portal:check . > /dev/null 2>&1; then
+  fail "the image does not build without VITE_SHELL_URL"
+else
+  pass "the image does not build without VITE_SHELL_URL"
+fi
+
+if docker build -q -f deploy/Dockerfile --build-arg VITE_SHELL_URL=/remoteEntry.js \
+  -t market-agri-transactions-portal:check . > /dev/null; then
   pass "deploy/Dockerfile builds the image"
 else
   fail "deploy/Dockerfile builds the image"
+fi
+
+# ADR-017: the image serves what the gateway asks for once it strips /portals/transactions/.
+docker run -d --rm --name transactions-portal-check market-agri-transactions-portal:check > /dev/null
+sleep 1
+entry="$(docker exec transactions-portal-check wget -qSO /dev/null http://127.0.0.1/remoteEntry.js 2>&1)"
+docker stop transactions-portal-check > /dev/null
+if grep -qi 'Cache-Control: no-store' <<< "$entry"; then
+  pass "remoteEntry.js is served at the root of the image, never cached"
+else
+  fail "remoteEntry.js is served at the root of the image, never cached"
 fi
 
 echo
