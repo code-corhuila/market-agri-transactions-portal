@@ -2,6 +2,12 @@
 export const REMOTE_NAME = 'transactions';
 export const EXPOSES = { './App': './src/App.tsx' };
 
+/**
+ * Where the gateway serves this portal, in the container's origin (ADR-017). It strips the prefix,
+ * and the portal is built with it as its public base, so its chunks are asked for under it.
+ */
+export const PUBLIC_BASE = `/portals/${REMOTE_NAME}/`;
+
 /** Libraries this portal takes from the container as one copy (ADR-021, Annex H). */
 export const SINGLETONS = ['react', 'react-dom', 'react-router-dom'] as const;
 
