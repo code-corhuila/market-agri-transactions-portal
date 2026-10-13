@@ -1,0 +1,35 @@
+name: CI
+
+# Required check `ci` on develop, qa and main (git-conventions §6): unit and component tests, build
+# and image. This portal loaded by the real container is tested by market-agri-front (`integration`).
+
+on:
+  pull_request:
+    branches: [develop, qa, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run format
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run test:component
+      - run: npm run build
+      - name: Docker image (build context and build, R-21)
+        run: bash test/docker/image.sh
