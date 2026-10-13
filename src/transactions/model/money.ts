@@ -23,3 +23,30 @@ export function parseQuantity(text: string): number | null {
 export function estimatedAmount(quantity: number, unitPrice: number): number {
   return Math.floor((Math.round(quantity * 100) * unitPrice + 50) / 100);
 }
+
+const DATE_TIME = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+function partsOf(timestamp: string): Record<string, string> {
+  const parts = DATE_TIME.formatToParts(new Date(timestamp));
+  return Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+}
+
+/** `2026-10-13T15:00:00Z` → `13/10/2026`, in Colombian time whatever the browser's zone. */
+export function formatDate(timestamp: string): string {
+  const { day, month, year } = partsOf(timestamp);
+  return `${day}/${month}/${year}`;
+}
+
+/** `2026-10-13T15:00:00Z` → `13/10/2026 10:00`. */
+export function formatDateTime(timestamp: string): string {
+  const { hour, minute } = partsOf(timestamp);
+  return `${formatDate(timestamp)} ${hour}:${minute}`;
+}
