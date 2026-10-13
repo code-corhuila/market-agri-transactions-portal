@@ -27,9 +27,12 @@ describe('portal rules (Annex H)', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('never knows the gateway: no gateway variable, no absolute API URL', () => {
+  // Structural, not one spelling of it (review of the structure PR): the code of the portal reads
+  // no build-time configuration and holds no absolute URL, so it cannot know any address. The one
+  // address it needs, the container's remoteEntry, lives in vite.config.ts.
+  it('never knows an address: no import.meta.env and no absolute URL in src', () => {
     const offenders = sources(SRC).filter((file) =>
-      /VITE_GATEWAY_URL|https?:\/\/[^'"`\s]*\/api\//.test(readFileSync(file, 'utf8')),
+      /import\.meta\.env|https?:\/\//.test(readFileSync(file, 'utf8')),
     );
     expect(offenders).toEqual([]);
   });

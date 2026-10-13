@@ -13,11 +13,17 @@ export function PageHeader({ title, subtitle }: { title: ReactNode; subtitle?: R
   );
 }
 
-export function EmptyState(props: { icon: LucideIcon; title: ReactNode; description?: ReactNode }) {
+export function EmptyState(props: {
+  icon: LucideIcon;
+  title: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div>
       <h2>{props.title}</h2>
       {props.description && <p>{props.description}</p>}
+      {props.action}
     </div>
   );
 }
