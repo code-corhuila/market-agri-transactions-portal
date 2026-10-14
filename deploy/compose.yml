@@ -1,0 +1,18 @@
+# Included by market-agri-infra (G8b). The gateway serves this portal under /portals/transactions/
+# (ADR-017); like every service but the gateway, it publishes no port.
+services:
+  transactions-portal:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args:
+        # The container's remoteEntry.js, in the same origin as this portal.
+        VITE_SHELL_URL: /remoteEntry.js
+    expose: ['80']
+    restart: unless-stopped
+    networks: [platform]
+
+networks:
+  platform:
+    name: platform-${ENV:?set ENV}
+    external: true
