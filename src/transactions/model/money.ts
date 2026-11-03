@@ -2,9 +2,18 @@
 const PESOS = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
 const QUANTITY = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
 
-/** `462500` → `$ 462.500`; with `suffix`, `$ 462.500 COP` (only on totals). ADR-026. */
-export function formatPesos(pesos: number, { suffix = false } = {}): string {
-  return `$ ${PESOS.format(pesos)}${suffix ? ' COP' : ''}`;
+const CENTS_PER_PESO = 100;
+
+/**
+ * Money from integer centavos (ADR-029, design-system.md "Money"): `46250000` → `$ 462.500`;
+ * `8500050` → `$ 85.000,50` (centavos only when not zero); with `suffix`, ` COP` (only on totals).
+ * Pesos and centavos are split with integer arithmetic: no amount goes through a float division.
+ */
+export function formatCents(cents: number, { suffix = false } = {}): string {
+  const pesos = Math.trunc(cents / CENTS_PER_PESO);
+  const rest = cents % CENTS_PER_PESO;
+  const centavos = rest === 0 ? '' : `,${String(rest).padStart(2, '0')}`;
+  return `$ ${PESOS.format(pesos)}${centavos}${suffix ? ' COP' : ''}`;
 }
 
 export function formatNumber(quantity: number): string {
@@ -19,9 +28,13 @@ export function parseQuantity(text: string): number | null {
   return value > 0 ? value : null;
 }
 
-/** D-C11 as the server computes it: round_half_up(quantity × unitPrice, 0), in hundredths. */
-export function estimatedAmount(quantity: number, unitPrice: number): number {
-  return Math.floor((Math.round(quantity * 100) * unitPrice + 50) / 100);
+/**
+ * D-C11 as the server computes it (amended 2026-11-01): round_half_up(quantity × unitPriceCents, 0)
+ * in integer centavos. The quantity has at most 2 decimals (D-C7), so it is taken in hundredths.
+ */
+export function estimatedAmountCents(quantity: number, unitPriceCents: number): number {
+  const hundredths = Math.round(quantity * 100);
+  return Math.floor((hundredths * unitPriceCents + 50) / 100);
 }
 
 const DATE_TIME = new Intl.DateTimeFormat('es-CO', {

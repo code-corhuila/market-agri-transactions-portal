@@ -88,9 +88,9 @@ describe('transaction detail (HU-TXN-001, E-41)', () => {
         status: 'CONFIRMED',
         confirmedAt: '2026-10-13T15:00:05Z',
         ledger: {
-          grossAmount: 462500,
-          platformFee: 0,
-          netAmount: 462500,
+          grossAmountCents: 46_250_000,
+          platformFeeCents: 0,
+          netAmountCents: 46_250_000,
           currency: 'COP',
           status: 'PENDING_DISBURSEMENT',
           createdAt: '2026-10-13T15:00:05Z',

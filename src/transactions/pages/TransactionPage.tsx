@@ -7,7 +7,7 @@ import { getTransaction } from '../api/transactions';
 import { useRemote } from '../api/useRemote';
 import { RetryAlert } from '../components/RetryAlert';
 import { PURCHASES_PATH, SALES_PATH } from '../model/routes';
-import { formatDateTime, formatNumber, formatPesos } from '../model/money';
+import { formatDateTime, formatNumber, formatCents } from '../model/money';
 import { isTransactionId, statusBadge, unitName, type TransactionView } from '../model/transaction';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -85,9 +85,9 @@ function Detail({ item, producer }: { item: TransactionView; producer: boolean }
             {formatNumber(item.quantity)} {unitName(item.unit, item.quantity !== 1)}
           </dd>
           <dt className="subtle">Precio por {unitName(item.unit)}</dt>
-          <dd>{formatPesos(item.unitPrice)}</dd>
+          <dd>{formatCents(item.unitPriceCents)}</dd>
           <dt className="subtle">Total</dt>
-          <dd>{formatPesos(item.amount, { suffix: true })}</dd>
+          <dd>{formatCents(item.amountCents, { suffix: true })}</dd>
           <dt className="subtle">Fecha de la compra</dt>
           <dd>{formatDateTime(item.createdAt)}</dd>
           {item.confirmedAt && (
@@ -102,7 +102,7 @@ function Detail({ item, producer }: { item: TransactionView; producer: boolean }
         <Card>
           <dl className="stack-sm">
             <dt className="subtle">Neto a recibir</dt>
-            <dd>{formatPesos(item.ledger.netAmount)}</dd>
+            <dd>{formatCents(item.ledger.netAmountCents)}</dd>
             <dt className="subtle">Desembolso</dt>
             <dd>Pendiente de desembolso</dd>
           </dl>
