@@ -1,4 +1,5 @@
-// Bodies of api-contract §4.2–§4.4 and E-40 as the services (or the simulated mode) answer them.
+// Bodies of api-contract §4.2–§4.4 and E-40 as the services (or the simulated mode) answer them:
+// money in integer centavos with the `Cents` suffix (ADR-029).
 export const PRODUCT_ID = '5e1f0c2a-7b3d-4e8f-9a6b-000000000001';
 export const CONVERSATION_ID = '7a7a7a7a-1b2c-4d3e-8f90-000000000001';
 export const TRANSACTION_ID = '9c9c9c9c-1b2c-4d3e-8f90-000000000001';
@@ -11,7 +12,7 @@ export const product = (overrides: Record<string, unknown> = {}) => ({
   category: 'CAFE',
   unit: 'ARROBA',
   quantity: 12.5,
-  price: 185000,
+  priceCents: 18_500_000,
   currency: 'COP',
   municipality: 'Garzón',
   status: 'ACTIVE',
@@ -32,8 +33,8 @@ export const transaction = (overrides: Record<string, unknown> = {}) => ({
   producerName: 'Ana Ruiz',
   quantity: 2.5,
   unit: 'ARROBA',
-  unitPrice: 185000,
-  amount: 462500,
+  unitPriceCents: 18_500_000,
+  amountCents: 46_250_000,
   currency: 'COP',
   status: 'PENDING',
   createdAt: '2026-10-13T15:00:00Z',
