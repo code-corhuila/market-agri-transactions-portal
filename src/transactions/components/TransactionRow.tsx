@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Badge, Card } from 'shell/ui';
-import { formatDate, formatNumber, formatPesos } from '../model/money';
+import { formatDate, formatNumber, formatCents } from '../model/money';
 import { transactionPath } from '../model/routes';
 import { statusBadge, unitName, type TransactionView } from '../model/transaction';
 import styles from './TransactionRow.module.css';
@@ -16,7 +16,7 @@ export function TransactionRow({ item, other }: { item: TransactionView; other: 
         </Link>
         <Badge variant={badge.variant}>{badge.label}</Badge>
       </div>
-      <strong>{formatPesos(item.amount, { suffix: true })}</strong>
+      <strong>{formatCents(item.amountCents, { suffix: true })}</strong>
       <p className="subtle">
         {formatNumber(item.quantity)} {unitName(item.unit, item.quantity !== 1)} · {other} ·{' '}
         {formatDate(item.createdAt)}
