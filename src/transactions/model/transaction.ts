@@ -7,16 +7,17 @@ export interface ProductView {
   name: string;
   unit: string;
   quantity: number;
-  price: number;
+  /** Integer centavos per unit (ADR-029). */
+  priceCents: number;
   status: 'ACTIVE' | 'OUT_OF_STOCK';
   producerName: string;
 }
 
 /** D-C14: what the producer will receive, only once CONFIRMED and only for the producer. */
 export interface LedgerView {
-  grossAmount: number;
-  platformFee: number;
-  netAmount: number;
+  grossAmountCents: number;
+  platformFeeCents: number;
+  netAmountCents: number;
   currency: 'COP';
   status: 'PENDING_DISBURSEMENT';
   createdAt: string;
@@ -33,8 +34,10 @@ export interface TransactionView {
   producerName: string;
   quantity: number;
   unit: string;
-  unitPrice: number;
-  amount: number;
+  /** Price at reservation time, integer centavos (ADR-029). */
+  unitPriceCents: number;
+  /** round_half_up(quantity × unitPriceCents, 0), computed by the server (D-C11). */
+  amountCents: number;
   currency: 'COP';
   status: TransactionStatus;
   createdAt: string;

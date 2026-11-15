@@ -20,6 +20,15 @@ describe('portal rules (Annex H)', () => {
     expect(existsSync(SRC) && sources(SRC).length).toBeTruthy();
   });
 
+  // ADR-029 (transactions-portal#11, AC4): every money field ends in Cents, and only money.ts
+  // turns centavos into text; no component reads price, unitPrice, amount or a ledger amount.
+  it('reads money only from the …Cents fields', () => {
+    const OLD =
+      /\b(price|unitPrice|amount|grossAmount|platformFee|netAmount)\b(?!Cents)\s*[:?]|\.(price|unitPrice|amount|grossAmount|platformFee|netAmount)\b/;
+    const offenders = sources(SRC).filter((file) => OLD.test(readFileSync(file, 'utf8')));
+    expect(offenders).toEqual([]);
+  });
+
   it('never calls fetch: every request goes through shell/apiClient', () => {
     const offenders = sources(SRC).filter((file) =>
       /\bfetch\s*\(/.test(readFileSync(file, 'utf8')),
