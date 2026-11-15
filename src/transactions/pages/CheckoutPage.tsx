@@ -6,7 +6,7 @@ import { useSession } from 'shell/useSession';
 import { getProduct, startPurchase } from '../api/purchase';
 import { useRemote } from '../api/useRemote';
 import { RetryAlert } from '../components/RetryAlert';
-import { estimatedAmount, formatNumber, formatPesos, parseQuantity } from '../model/money';
+import { estimatedAmountCents, formatCents, formatNumber, parseQuantity } from '../model/money';
 import { unitName, type ProductView } from '../model/transaction';
 
 const REQUIRED = 'Es obligatorio.';
@@ -77,7 +77,7 @@ function CheckoutForm({ product }: { product: ProductView }) {
     <section className="stack">
       <PageHeader
         title={`Comprar ${product.name}`}
-        subtitle={`${formatPesos(product.price)} por ${unitName(product.unit)} · Disponible: ${available}`}
+        subtitle={`${formatCents(product.priceCents)} por ${unitName(product.unit)} · Disponible: ${available}`}
       />
       {product.status === 'OUT_OF_STOCK' ? (
         <EmptyState
@@ -95,7 +95,7 @@ function CheckoutForm({ product }: { product: ProductView }) {
             {quantity !== null && (
               <p>
                 Total estimado:{' '}
-                {formatPesos(estimatedAmount(quantity, product.price), { suffix: true })}
+                {formatCents(estimatedAmountCents(quantity, product.priceCents), { suffix: true })}
               </p>
             )}
             <p className="subtle">
